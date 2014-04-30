@@ -5,6 +5,13 @@ class Ruby
   PINK = ["class","def"].freeze
   CONDITION = ["if","else"].freeze
   ORANGE = ["if"].freeze
+  COLOR_LIST = {
+    red: '<op:color code="#ff0000">',
+    blue: '<op:color code="#0000ff">',
+    pink: '<op:color code="#ff00ff">',
+    orange: '<op:color code="#ffa500">',
+    green: '<op:color code="#00ff00">'
+  }
 
   class << self
     def parse(file)
@@ -28,9 +35,9 @@ class Ruby
 
   def proc_end(value)
     if @kw_stack.pop == :pink
-      "<pink>#{value}</pink>"
+      "#{COLOR_LIST[:pink]}#{value}</op:color>"
     else
-      "<orange>#{value}</orange>"
+      "#{COLOR_LIST[:orange]}#{value}</op:color>"
     end
   end
 
@@ -56,35 +63,35 @@ class Ruby
       when :on_ignored_nl
         source += "\n"
       when :on_int
-        source += "<red>#{value}</red>"
+        source += "#{COLOR_LIST[:red]}#{value}</op:color>"
       when :on_kw
         if PINK.include?(value)
-          source += "<pink>#{value}</pink>"
+          source += "#{COLOR_LIST[:pink]}#{value}</op:color>"
           @kw_stack << :pink
           @def_flag = true if value == "def"
         elsif CONDITION.include?(value)
-          source += "<orange>#{value}</orange>"
+          source += "#{COLOR_LIST[:orange]}#{value}</op:color>"
           conditional(value)
         elsif ["end"].include?(value)
             source += proc_end(value)
         else
           if @kw_stack.last == :pink
-            source += "<pink>#{value}</pink>"
+            source += "#{COLOR_LIST[:pink]}#{value}</op:color>"
           else
-            source += "<orange>#{value}</orange>"
+            source += "#{COLOR_LIST[:orange]}#{value}</op:color>"
           end
         end
       when :on_tstring_beg
-        source += "<red>#{value}"
+        source += "#{COLOR_LIST[:red]}#{value}"
       when :on_tstring_end
-        source += "#{value}</red>"
+        source += "#{value}</op:color>"
       when :on_comment
-        source += "<blue>#{value.chomp}</blue>\n"
+        source += "#{COLOR_LIST[:blue]}#{value.chomp}</op:color>\n"
       when :on_const
-        source += "<green>#{value}</green>"
+        source += "#{COLOR_LIST[:green]}{#{value}</op:color>"
       when :on_ident
         if @def_flag
-          source += "<aqua>#{value}</aqua>"
+          source += "<aqua>#{value}</op:color>"
         else
           source += value
         end
@@ -97,5 +104,5 @@ class Ruby
   end
 end
 
-result = Ruby.parse("/Users/siman/Programming/ruby/sns_parser/example/test.rb")
+result = Ruby.parse("../../example/test.rb")
 puts result
